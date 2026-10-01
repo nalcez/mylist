@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101322">
+  <title>AnasList — Senarai Tugasan</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="AnasList">
+        <span class="brand-mark">✓</span>
+        <span>Anas<span class="brand-light">List</span></span>
+      </a>
+      <span class="date-label" id="todayLabel"></span>
+    </header>
+
+    <section class="intro">
+      <p class="eyebrow">RUANG PRODUKTIVITI ANDA</p>
+      <h1>Rancang hari,<br><span>capai lebih banyak.</span></h1>
+      <p class="subtitle">Satu langkah kecil pada satu masa. Jom mula susun tugasan anda.</p>
+    </section>
+
+    <section class="summary" aria-label="Ringkasan tugasan">
+      <div class="summary-card">
+        <span class="summary-label">Jumlah tugasan</span>
+        <strong id="totalCount">0</strong>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">Belum selesai</span>
+        <strong id="pendingCount">0</strong>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">Sudah selesai</span>
+        <strong id="doneCount">0</strong>
+      </div>
+    </section>
+
+    <section class="task-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Senarai saya</h2>
+          <p>Tambah dan urus perkara yang perlu dibuat.</p>
+        </div>
+      </div>
+
+      <form id="taskForm" class="task-form">
+        <label class="sr-only" for="taskInput">Tugasan baharu</label>
+        <input id="taskInput" type="text" maxlength="120" placeholder="Contoh: Siapkan idea website..." autocomplete="off" required>
+        <button type="submit"><span aria-hidden="true">＋</span> Tambah</button>
+      </form>
+
+      <div class="list-toolbar">
+        <div class="filters" role="group" aria-label="Tapis tugasan">
+          <button class="filter active" data-filter="all" type="button">Semua</button>
+          <button class="filter" data-filter="pending" type="button">Belum selesai</button>
+          <button class="filter" data-filter="done" type="button">Selesai</button>
+        </div>
+        <button id="clearDone" class="clear-button" type="button">Padam yang selesai</button>
+      </div>
+
+      <ul id="taskList" class="task-list" aria-live="polite"></ul>
+      <div id="emptyState" class="empty-state">
+        <span class="empty-icon">✦</span>
+        <strong>Belum ada tugasan</strong>
+        <p>Tambah tugasan pertama anda di atas.</p>
+      </div>
+    </section>
+
+    <footer>Disusun dengan teliti · AnasList</footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
