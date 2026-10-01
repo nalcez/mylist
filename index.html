@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -23,54 +24,91 @@
       <p class="subtitle">Jom mula susun tugasan anda.</p>
     </section>
 
-    <section class="summary" aria-label="Ringkasan tugasan">
-      <div class="summary-card">
-        <span class="summary-label">Jumlah tugasan</span>
-        <strong id="totalCount">0</strong>
-      </div>
-      <div class="summary-card">
-        <span class="summary-label">Belum selesai</span>
-        <strong id="pendingCount">0</strong>
-      </div>
-      <div class="summary-card">
-        <span class="summary-label">Sudah selesai</span>
-        <strong id="doneCount">0</strong>
-      </div>
-    </section>
-
-    <section class="task-panel">
+    <!-- Bahagian akaun -->
+    <section class="task-panel" id="authPanel">
       <div class="panel-heading">
         <div>
-          <h2>Senarai saya</h2>
-          <p>Tambah dan urus perkara yang perlu dibuat.</p>
+          <h2>Akaun MyList</h2>
+          <p>Log masuk atau daftar akaun baharu.</p>
         </div>
       </div>
 
-      <form id="taskForm" class="task-form">
-        <label class="sr-only" for="taskInput">Tugasan baharu</label>
-        <input id="taskInput" type="text" maxlength="120" placeholder="Contoh: Siapkan idea website..." autocomplete="off" required>
-        <button type="submit"><span aria-hidden="true">＋</span> Tambah</button>
+      <form id="authForm" class="task-form">
+        <label class="sr-only" for="emailInput">Emel</label>
+        <input id="emailInput" type="email" placeholder="Alamat emel" required>
+
+        <label class="sr-only" for="passwordInput">Kata laluan</label>
+        <input id="passwordInput" type="password" placeholder="Kata laluan" minlength="6" required>
+
+        <button type="submit" id="loginButton">Log masuk</button>
+        <button type="button" id="signupButton">Daftar akaun</button>
       </form>
-
-      <div class="list-toolbar">
-        <div class="filters" role="group" aria-label="Tapis tugasan">
-          <button class="filter active" data-filter="all" type="button">Semua</button>
-          <button class="filter" data-filter="pending" type="button">Belum selesai</button>
-          <button class="filter" data-filter="done" type="button">Selesai</button>
-        </div>
-        <button id="clearDone" class="clear-button" type="button">Padam yang selesai</button>
-      </div>
-
-      <ul id="taskList" class="task-list" aria-live="polite"></ul>
-      <div id="emptyState" class="empty-state">
-        <span class="empty-icon">✦</span>
-        <strong>Belum ada tugasan</strong>
-        <p>Tambah tugasan anda.</p>
-      </div>
+      <p id="authMessage" role="status"></p>
     </section>
+
+    <!-- Bahagian tugasan -->
+    <div id="workspace" hidden>
+      <div class="panel-heading">
+        <p id="userEmail"></p>
+        <button type="button" id="logoutButton">Log keluar</button>
+      </div>
+
+      <section class="summary" aria-label="Ringkasan tugasan">
+        <div class="summary-card">
+          <span class="summary-label">Jumlah tugasan</span>
+          <strong id="totalCount">0</strong>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label">Belum selesai</span>
+          <strong id="pendingCount">0</strong>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label">Sudah selesai</span>
+          <strong id="doneCount">0</strong>
+        </div>
+      </section>
+
+      <section class="task-panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Senarai saya</h2>
+            <p>Tambah dan urus perkara yang perlu dibuat.</p>
+          </div>
+        </div>
+
+        <form id="taskForm" class="task-form">
+          <label class="sr-only" for="taskInput">Tugasan baharu</label>
+          <input id="taskInput" type="text" maxlength="120"
+            placeholder="Contoh: Siapkan idea website..."
+            autocomplete="off" required>
+          <button type="submit">＋ Tambah</button>
+        </form>
+
+        <div class="list-toolbar">
+          <div class="filters" role="group" aria-label="Tapis tugasan">
+            <button class="filter active" data-filter="all" type="button">Semua</button>
+            <button class="filter" data-filter="pending" type="button">Belum selesai</button>
+            <button class="filter" data-filter="done" type="button">Selesai</button>
+          </div>
+          <button id="clearDone" class="clear-button" type="button">
+            Padam yang selesai
+          </button>
+        </div>
+
+        <ul id="taskList" class="task-list" aria-live="polite"></ul>
+        <div id="emptyState" class="empty-state">
+          <span class="empty-icon">✦</span>
+          <strong>Belum ada tugasan</strong>
+          <p>Tambah tugasan anda.</p>
+        </div>
+      </section>
+    </div>
 
     <footer>Disusun dengan teliti · MyList</footer>
   </main>
+
+  <!-- Pustaka Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script.js"></script>
 </body>
 </html>
