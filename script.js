@@ -1,4 +1,4 @@
-const STORAGE_KEY = "anaslist-tasks-v1";
+const STORAGE_KEY = "mylist-tasks-v1";
 const taskForm = document.querySelector("#taskForm");
 const taskInput = document.querySelector("#taskInput");
 const taskList = document.querySelector("#taskList");
