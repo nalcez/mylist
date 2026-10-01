@@ -1,37 +1,147 @@
-const STORAGE_KEY = "mylist-tasks-v1";
-const taskForm = document.querySelector("#taskForm");
-const taskInput = document.querySelector("#taskInput");
-const taskList = document.querySelector("#taskList");
-const emptyState = document.querySelector("#emptyState");
-const totalCount = document.querySelector("#totalCount");
-const pendingCount = document.querySelector("#pendingCount");
-const doneCount = document.querySelector("#doneCount");
-const clearDone = document.querySelector("#clearDone");
-const todayLabel = document.querySelector("#todayLabel");
+
+// Masukkan maklumat projek Supabase anda di sini
+const SUPABASE_URL = "https://mopacmwyfdykddjtjvog.supabase.co";
+const SUPABASE_KEY = "sb_publishable_imxAqgPSbs4ogbYnadjm8A_i_J5FtXZ";
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const $ = (selector) => document.querySelector(selector);
+
+const authPanel = $("#authPanel");
+const authForm = $("#authForm");
+const authMessage = $("#authMessage");
+const emailInput = $("#emailInput");
+const passwordInput = $("#passwordInput");
+const workspace = $("#workspace");
+const userEmail = $("#userEmail");
+
+const taskForm = $("#taskForm");
+const taskInput = $("#taskInput");
+const taskList = $("#taskList");
+const emptyState = $("#emptyState");
+const totalCount = $("#totalCount");
+const pendingCount = $("#pendingCount");
+const doneCount = $("#doneCount");
+const clearDone = $("#clearDone");
 const filterButtons = document.querySelectorAll(".filter");
 
-let tasks = loadTasks();
+let tasks = [];
 let currentFilter = "all";
+let currentUser = null;
 
-todayLabel.textContent = new Intl.DateTimeFormat("ms-MY", {
-  weekday: "long", day: "numeric", month: "long"
+$("#todayLabel").textContent = new Intl.DateTimeFormat("ms-MY", {
+  weekday: "long",
+  day: "numeric",
+  month: "long"
 }).format(new Date());
 
-function loadTasks() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    return Array.isArray(saved) ? saved : [];
-  } catch {
-    return [];
+function showMessage(message, isError = false) {
+  authMessage.textContent = message;
+  authMessage.style.color = isError ? "#ff7777" : "inherit";
+}
+
+// Daftar akaun
+$("#signupButton").addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  if (!email || !password) {
+    showMessage("Masukkan emel dan kata laluan.", true);
+    return;
+  }
+
+  showMessage("Sedang mendaftar...");
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) {
+    showMessage(error.message, true);
+    return;
+  }
+
+  if (data.session) {
+    showMessage("Pendaftaran berjaya!");
+  } else {
+    showMessage("Semak emel anda untuk mengesahkan akaun.");
+  }
+});
+
+// Log masuk
+authForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  showMessage("Sedang log masuk...");
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    showMessage(error.message, true);
+  }
+});
+
+// Log keluar
+$("#logoutButton").addEventListener("click", async () => {
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    alert(error.message);
+  }
+});
+
+// Paparkan keadaan akaun
+async function setUser(user) {
+  currentUser = user;
+  authPanel.hidden = !!user;
+  workspace.hidden = !user;
+
+  if (user) {
+    userEmail.textContent = user.email || "";
+    await loadTasks();
+  } else {
+    tasks = [];
+    render();
   }
 }
 
-function saveTasks() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+// Dapatkan tugasan daripada Supabase
+async function loadTasks() {
+  if (!currentUser) return;
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    alert("Gagal memuatkan tugasan: " + error.message);
+    return;
+  }
+
+  tasks = data.map(row => ({
+    id: row.id,
+    text: row.title,
+    done: row.is_done
+  }));
+
+  render();
 }
 
+// Paparkan tugasan
 function render() {
   taskList.replaceChildren();
+
   const visibleTasks = tasks.filter(task => {
     if (currentFilter === "pending") return !task.done;
     if (currentFilter === "done") return task.done;
@@ -46,10 +156,20 @@ function render() {
     checkbox.type = "checkbox";
     checkbox.className = "task-check";
     checkbox.checked = task.done;
-    checkbox.setAttribute("aria-label", `Tandakan ${task.text} sebagai ${task.done ? "belum selesai" : "selesai"}`);
-    checkbox.addEventListener("change", () => {
+    checkbox.setAttribute("aria-label", `Tandakan ${task.text}`);
+
+    checkbox.addEventListener("change", async () => {
+      const { error } = await supabase
+        .from("tasks")
+        .update({ is_done: checkbox.checked })
+        .eq("id", task.id);
+
+      if (error) {
+        alert("Gagal mengemas kini tugasan: " + error.message);
+        return;
+      }
+
       task.done = checkbox.checked;
-      saveTasks();
       render();
     });
 
@@ -61,10 +181,20 @@ function render() {
     remove.type = "button";
     remove.className = "delete-button";
     remove.textContent = "×";
-    remove.setAttribute("aria-label", `Padam tugasan ${task.text}`);
-    remove.addEventListener("click", () => {
+    remove.setAttribute("aria-label", `Padam ${task.text}`);
+
+    remove.addEventListener("click", async () => {
+      const { error } = await supabase
+        .from("tasks")
+        .delete()
+        .eq("id", task.id);
+
+      if (error) {
+        alert("Gagal memadam tugasan: " + error.message);
+        return;
+      }
+
       tasks = tasks.filter(entry => entry.id !== task.id);
-      saveTasks();
       render();
     });
 
@@ -73,36 +203,91 @@ function render() {
   });
 
   const completed = tasks.filter(task => task.done).length;
+
   totalCount.textContent = tasks.length;
   pendingCount.textContent = tasks.length - completed;
   doneCount.textContent = completed;
   emptyState.hidden = visibleTasks.length > 0;
 }
 
-taskForm.addEventListener("submit", event => {
+// Tambah tugasan
+taskForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const text = taskInput.value.trim();
-  if (!text) return;
 
-  tasks.unshift({ id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, text, done: false });
-  saveTasks();
+  const text = taskInput.value.trim();
+  if (!text || !currentUser) return;
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .insert({
+      user_id: currentUser.id,
+      title: text,
+      is_done: false
+    })
+    .select()
+    .single();
+
+  if (error) {
+    alert("Gagal menambah tugasan: " + error.message);
+    return;
+  }
+
+  tasks.unshift({
+    id: data.id,
+    text: data.title,
+    done: data.is_done
+  });
+
   taskInput.value = "";
   taskInput.focus();
   render();
 });
 
+// Penapis tugasan
 filterButtons.forEach(button => {
   button.addEventListener("click", () => {
     currentFilter = button.dataset.filter;
-    filterButtons.forEach(item => item.classList.toggle("active", item === button));
+
+    filterButtons.forEach(item => {
+      item.classList.toggle("active", item === button);
+    });
+
     render();
   });
 });
 
-clearDone.addEventListener("click", () => {
+// Padam semua tugasan yang selesai
+clearDone.addEventListener("click", async () => {
+  if (!currentUser) return;
+
+  const { error } = await supabase
+    .from("tasks")
+    .delete()
+    .eq("is_done", true);
+
+  if (error) {
+    alert("Gagal memadam tugasan: " + error.message);
+    return;
+  }
+
   tasks = tasks.filter(task => !task.done);
-  saveTasks();
   render();
 });
 
-render();
+// Semak sesi pengguna semasa
+async function initialize() {
+  const { data, error } = await supabase.auth.getSession();
+
+  if (error) {
+    showMessage(error.message, true);
+    return;
+  }
+
+  await setUser(data.session?.user ?? null);
+}
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  setUser(session?.user ?? null);
+});
+
+initialize();
