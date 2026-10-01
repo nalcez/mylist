@@ -3,7 +3,7 @@
 const SUPABASE_URL = "https://mopacmwyfdykddjtjvog.supabase.co";
 const SUPABASE_KEY = "sb_publishable_imxAqgPSbs4ogbYnadjm8A_i_J5FtXZ";
 
-const supabase = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
